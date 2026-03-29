@@ -75,6 +75,13 @@ int main()
 
         mem.Write<uint16_t>(inventoryServices + Offsets::m_unMusicID, skinManager->MusicKit.id);
 
+        // --- Music Kit Update Logic ---
+        static uint16_t lastMusicID = 0;
+        if (skinManager->MusicKit.id != lastMusicID || ForceUpdate) {
+            mem.Write<uint16_t>(inventoryServices + Offsets::m_unMusicID, skinManager->MusicKit.id);
+            lastMusicID = skinManager->MusicKit.id;
+        }
+
         UpdateActiveMenuDef(localPlayer);
         OnFrame();
 
@@ -112,8 +119,18 @@ int main()
             mem.Write<uint32_t>(item + Offsets::m_iItemIDHigh, -1);
 
             SkinInfo_t skin = GetSkin(item);
-            if (!skin.Paint) 
+            if (!skin.Paint && skin.weaponType != WeaponsEnum::CtKnife && skin.weaponType != WeaponsEnum::Tknife) 
                 continue;
+
+            // --- Knife Changer Support ---
+            if (skin.weaponType == WeaponsEnum::CtKnife || skin.weaponType == WeaponsEnum::Tknife) {
+                if (skinManager->Knife.defIndex != 0) {
+                    // Overwrite item definition index for the knife
+                    mem.Write<uint16_t>(item + Offsets::m_iItemDefinitionIndex, skinManager->Knife.defIndex);
+                    // Set quality to 3 (Star)
+                    mem.Write<int>(item + Offsets::m_iEntityQuality, 3);
+                }
+            }
 
             mem.Write<uint32_t>(weapon + Offsets::m_nFallbackPaintKit, skin.Paint);
 

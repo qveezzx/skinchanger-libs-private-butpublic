@@ -14,6 +14,7 @@ namespace overlay {
     inline int G_Width = GetSystemMetrics(SM_CXSCREEN);
     inline int G_Height = GetSystemMetrics(SM_CYSCREEN);
     inline BYTE GlobalAlpha = 255;
+    inline int G_MonitorIdx = 0; // 0 = Primary, 1 = Next, etc.
 
     inline HDC hdcScreen = nullptr;
     inline HDC hdcMem = nullptr;
@@ -21,7 +22,7 @@ namespace overlay {
     inline HBITMAP hbmOld = nullptr;
     inline void* pBits = nullptr;
 
-    void CreateLayeredWindow() {
+    inline void CreateLayeredWindow() {
         wcex = {
             sizeof(WNDCLASSEXW), 0, DefWindowProcW, 0, 0, nullptr,
             LoadIcon(nullptr, IDI_APPLICATION), LoadCursor(nullptr, IDC_ARROW),
@@ -30,10 +31,32 @@ namespace overlay {
 
         RegisterClassExW(&wcex);
 
+        // Monitor detection
+        struct MonitorData { int target; int current; RECT rect; };
+        MonitorData data = { G_MonitorIdx, 0, {0, 0, G_Width, G_Height} };
+        
+        EnumDisplayMonitors(NULL, NULL, [](HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) -> BOOL {
+            MonitorData* d = (MonitorData*)dwData;
+            if (d->current == d->target) {
+                d->rect = *lprcMonitor;
+            }
+            d->current++;
+            return TRUE;
+        }, (LPARAM)&data);
+
+        int winX = data.rect.left;
+        int winY = data.rect.top;
+        int winW = data.rect.right - data.rect.left;
+        int winH = data.rect.bottom - data.rect.top;
+
+        // Update globals for GUI mapping
+        G_Width = winW;
+        G_Height = winH;
+
         Window = CreateWindowExW(
             WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW,
             L"CS2_Overlay", L"Overlay",
-            WS_POPUP, 0, 0, G_Width, G_Height,
+            WS_POPUP, winX, winY, winW, winH,
             nullptr, nullptr, wcex.hInstance, nullptr
         );
 
@@ -109,7 +132,7 @@ namespace overlay {
             // Create Graphics from Bitmap in a scope to ensure destruction/flush
             {
                 Gdiplus::Graphics g(hdcMem);
-                SC_GUI::BeginFrame(&g);
+                SC_GUI::BeginFrame(&g, Window);
                 RenderCallback();
             } // g renders here
         }

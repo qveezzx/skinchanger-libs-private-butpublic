@@ -67,7 +67,7 @@ namespace SC_GUI {
         char lastChar = 0;
         std::string activeID = "";
 
-        void Update() {
+        void Update(HWND hWnd) {
             if (firstUpdate) {
                 GetCursorPos(&mousePos);
                 prevMousePos = mousePos;
@@ -76,7 +76,9 @@ namespace SC_GUI {
 
             prevMousePos = mousePos;
             GetCursorPos(&mousePos);
-            ScreenToClient(GetForegroundWindow(), &mousePos); // Map to client area roughly
+            
+            // Map to client area of our window
+            ScreenToClient(hWnd, &mousePos); 
 
             mouseDelta.x = mousePos.x - prevMousePos.x;
             mouseDelta.y = mousePos.y - prevMousePos.y;
@@ -105,7 +107,7 @@ namespace SC_GUI {
         GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
     }
 
-    inline void BeginFrame(Graphics* g) {
+    inline void BeginFrame(Graphics* g, HWND hWnd) {
         gfx = g;
         gfx->SetSmoothingMode(SmoothingModeAntiAlias);
         gfx->SetTextRenderingHint(TextRenderingHintClearTypeGridFit); // Better text
@@ -135,7 +137,7 @@ namespace SC_GUI {
             vCenterFormat->SetLineAlignment(StringAlignmentCenter);
         }
         
-        Input.Update();
+        Input.Update(hWnd);
     }
 
     // Helpers & Primitives

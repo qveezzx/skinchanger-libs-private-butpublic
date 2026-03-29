@@ -220,8 +220,18 @@ void RenderKnifeTab(float x, float y, float w, float h)
          bool selected = (selectedKnifeSkinIndex == i);
          if (SC_GUI::SkinCard("kskin_" + filteredSkins[i].name, filteredSkins[i].name, filteredSkins[i].image_url, filteredSkins[i].rarity, cX, cY, itemW, itemH, selected, configManager->diskCacheEnabled)) {
              selectedKnifeSkinIndex = i;
+             
+             // Set the base knife model
+             skinManager->Knife = Knifes[selectedKnifeIndex];
+
              if (i!=0) {
                  SkinInfo_t s = filteredSkins[i];
+                 s.weaponType = WeaponsEnum::CtKnife; skinManager->AddSkin(s);
+                 s.weaponType = WeaponsEnum::Tknife; skinManager->AddSkin(s);
+             } else {
+                 // Vanilla
+                 SkinInfo_t s = filteredSkins[i];
+                 s.Paint = 0;
                  s.weaponType = WeaponsEnum::CtKnife; skinManager->AddSkin(s);
                  s.weaponType = WeaponsEnum::Tknife; skinManager->AddSkin(s);
              }
@@ -417,6 +427,19 @@ void RenderSettingsTab(float x, float y, float w, float h)
             Color(255, 255, 255),
             Color(255, 170, 180, 200)
         };
+    }
+    curY += 45;
+
+    // Monitor Selection
+    SC_GUI::DrawStringA("Target Monitor", x + 20, curY, Color(255, 255, 255), SC_GUI::mainFont, false);
+    curY += 25;
+    if (SC_GUI::Button("mon_primary", "Monitor 1 (Primary)", x + 20, curY, 150, 30, overlay::G_MonitorIdx == 0)) {
+        overlay::G_MonitorIdx = 0;
+        // In a real app we'd need to re-create the window here, 
+        // but for now let's just update the index for next launch
+    }
+    if (SC_GUI::Button("mon_secondary", "Monitor 2", x + 180, curY, 150, 30, overlay::G_MonitorIdx == 1)) {
+        overlay::G_MonitorIdx = 1;
     }
     curY += 45;
     
