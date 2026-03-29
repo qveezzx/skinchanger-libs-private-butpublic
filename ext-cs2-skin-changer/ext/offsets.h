@@ -18,7 +18,7 @@ namespace Offsets
 
     inline std::ptrdiff_t m_pClippingWeapon = cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_pClippingWeapon; // C_CSWeaponBase*
     inline std::ptrdiff_t m_pWeaponServices = cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pWeaponServices; // CPlayer_WeaponServices*
-    inline std::ptrdiff_t m_pViewModelServices = cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pViewModelServices; // CPlayer_ViewModelServices*
+    inline std::ptrdiff_t m_pViewModelServices = cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_pViewModelServices; // CPlayer_ViewModelServices*
     inline std::ptrdiff_t m_hViewModel = 0x40; // CHandle<C_BaseViewModel>[3]
     inline std::ptrdiff_t m_hHudModelArms = cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_hHudModelArms; // CHandle<C_CS2HudModelArms>
     inline std::ptrdiff_t m_hOwnerEntity = cs2_dumper::schemas::client_dll::C_BaseEntity::m_hOwnerEntity; // CHandle<C_BaseEntity>

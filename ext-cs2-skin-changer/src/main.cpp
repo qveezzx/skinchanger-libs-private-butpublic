@@ -52,7 +52,7 @@ void sd()
 
 int main()
 {
-    mem.Write<uint16_t>(Sigs::RegenerateWeaponSkins + 0x52, Offsets::m_AttributeManager + Offsets::m_Item + Offsets::m_AttributeList + Offsets::m_Attributes);
+    mem.Write<uint16_t>(Sigs::RegenerateWeaponSkins + 0x52, static_cast<uint16_t>(Offsets::m_AttributeManager + Offsets::m_Item + Offsets::m_AttributeList + Offsets::m_Attributes));
 
     skindb->Dump();
     Updater::UpdateOffsets();

@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <curl/curl.h>
@@ -103,6 +103,7 @@ struct SkinInfo_t {
     WeaponsEnum weaponType = WeaponsEnum::none;
     int rarity = 0;
     std::string image_url; // Added Image URL
+    uint16_t defIndex = 0; // Added defIndex
 };
 
 struct Glove_t
@@ -173,6 +174,25 @@ public:
             if (skin.weaponType == def)
                 return skin;
         return SkinInfo_t{0, false, std::string(), WeaponsEnum::none};
+    }
+
+    SkinInfo_t GetKnife()
+    {
+        // Knife skins are stored in Skins vector with weaponType CtKnife/Tknife
+        SkinInfo_t info = GetSkin(WeaponsEnum::CtKnife);
+        if (info.weaponType == WeaponsEnum::none)
+            info = GetSkin(WeaponsEnum::Tknife);
+        return info;
+    }
+
+    SkinInfo_t GetGlove()
+    {
+        SkinInfo_t info;
+        info.defIndex = Gloves.defIndex;
+        info.Paint = Gloves.Paint;
+        info.name = Gloves.name;
+        info.weaponType = WeaponsEnum::none;
+        return info;
     }
 
     uint16_t GetSkinIndexFromArray(std::vector<SkinInfo_t> WeaponSkins, SkinInfo_t SelectedSkin)
