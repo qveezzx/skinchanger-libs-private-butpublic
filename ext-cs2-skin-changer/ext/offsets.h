@@ -16,11 +16,11 @@ namespace Offsets
     inline std::ptrdiff_t m_pInventoryServices = cs2_dumper::schemas::client_dll::CCSPlayerController::m_pInventoryServices; // CCSPlayerController_InventoryServices*
     inline std::ptrdiff_t m_unMusicID = cs2_dumper::schemas::client_dll::CCSPlayerController_InventoryServices::m_unMusicID; // uint16
 
-    inline std::ptrdiff_t m_pClippingWeapon = cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_pClippingWeapon; // C_CSWeaponBase*
+    inline std::ptrdiff_t m_pClippingWeapon = cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_pClippingWeapon; // C_CSWeaponBase*
     inline std::ptrdiff_t m_pWeaponServices = cs2_dumper::schemas::client_dll::C_BasePlayerPawn::m_pWeaponServices; // CPlayer_WeaponServices*
     inline std::ptrdiff_t m_pViewModelServices = cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_pViewModelServices; // CPlayer_ViewModelServices*
     inline std::ptrdiff_t m_hViewModel = 0x40; // CHandle<C_BaseViewModel>[3]
-    inline std::ptrdiff_t m_hHudModelArms = cs2_dumper::schemas::client_dll::C_CSPlayerPawn::m_hHudModelArms; // CHandle<C_CS2HudModelArms>
+    inline std::ptrdiff_t m_hHudModelArms = 0x0; // Removed in current schema, setting to 0 to avoid error
     inline std::ptrdiff_t m_hOwnerEntity = cs2_dumper::schemas::client_dll::C_BaseEntity::m_hOwnerEntity; // CHandle<C_BaseEntity>
     inline std::ptrdiff_t m_pEntity = cs2_dumper::schemas::client_dll::CEntityInstance::m_pEntity; // CEntityIdentity*
     inline std::ptrdiff_t m_flags = cs2_dumper::schemas::client_dll::CEntityIdentity::m_flags; // uint32
