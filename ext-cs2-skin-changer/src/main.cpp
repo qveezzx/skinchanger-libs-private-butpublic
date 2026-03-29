@@ -147,82 +147,64 @@ int main()
             ShouldUpdate = true;
         }
 
-        // --- Glove Changer Logic ---
-        static uint16_t lastGloveDef = 0;
-        static int lastGlovePaint = 0;
-        
-        bool userChangedSettings = (skinManager->Gloves.defIndex != lastGloveDef || 
-                                    skinManager->Gloves.Paint != lastGlovePaint);
+        // --- Knife & Viewmodel Update ---
+        uintptr_t pViewModelServices = mem.Read<uintptr_t>(localPlayer + Offsets::m_pViewModelServices);
+        if (pViewModelServices) {
+            uint32_t hViewModel = mem.Read<uint32_t>(pViewModelServices + Offsets::m_hViewModel);
+            if (hViewModel != 0xFFFFFFFF) {
+                uintptr_t viewModel = GetEntityByHandle(hViewModel & 0x7FFF);
+                if (viewModel) {
+                     uint32_t activeWeaponHandle = mem.Read<uint32_t>(pWeaponServices + Offsets::m_hActiveWeapon);
+                     uintptr_t activeWeapon = GetEntityByHandle(activeWeaponHandle & 0x7FFF);
+                     if (activeWeapon) {
+                         uintptr_t item = activeWeapon + Offsets::m_AttributeManager + Offsets::m_Item;
+                         uint16_t activeDef = mem.Read<uint16_t>(item + Offsets::m_iItemDefinitionIndex);
+                         
+                         // CT: 42, T: 59, or custom knives
+                         if (activeDef == 42 || activeDef == 59 || (activeDef >= 500 && activeDef <= 526)) {
+                             if (skinManager->Knife.defIndex != 0) {
+                                 mem.Write<uint16_t>(viewModel + Offsets::m_iItemDefinitionIndex, skinManager->Knife.defIndex);
+                                 mem.Write<int>(viewModel + Offsets::m_iEntityQuality, 3);
+                                 
+                                 SkinInfo_t knifeSkin = skinManager->GetKnife();
+                                 econItemAttributeManager.Create(viewModel, knifeSkin);
+                             }
+                         }
+                     }
+                }
+            }
+        }
 
+        // --- Glove Changer Logic ---
         if (skinManager->Gloves.defIndex != 0)
         {
              const uintptr_t localPlayerPawn = GetLocalPlayer(); 
              if (localPlayerPawn) {
                  const uintptr_t econGloves = localPlayerPawn + Offsets::m_EconGloves;
                  
-                 // Read current (before we overwrite)
-                 uint16_t currentDef = mem.Read<uint16_t>(econGloves + Offsets::m_iItemDefinitionIndex);
-                 int currentPaint = mem.Read<int>(econGloves + Offsets::m_nFallbackPaintKit);
-                 // int currentIDHigh = mem.Read<int>(econGloves + Offsets::m_iItemIDHigh);
+                 static uint16_t lastTargetDef = 0;
+                 static uint32_t lastTargetPaint = 0;
+                 static bool firstRun = true;
 
-                 // Get Valid XUID from Active Weapon (if existing) or fallback to AccountID
-                 int xuidLow = -1;
-                 int xuidHigh = -1;
-                 if (weapons.size() > 0) {
-                     uintptr_t firstWep = weapons[0]; 
-                     if (firstWep) {
-                         xuidLow = mem.Read<int>(firstWep + Offsets::m_OriginalOwnerXuidLow);
-                         xuidHigh = mem.Read<int>(firstWep + Offsets::m_OriginalOwnerXuidLow + 4);
-                     }
-                 }
-
-                 // Debug Output (Throttle to every 60 frames ~ 1 sec)
-                 static int frameCount = 0;
-                 if (frameCount++ % 60 == 0) {
-                     std::cout << "[GloveDebug] CurDef: " << currentDef << " | CurPaint: " << currentPaint 
-                               << " | TargetDef: " << skinManager->Gloves.defIndex 
-                               << " | TargetPaint: " << skinManager->Gloves.Paint 
-                               << " | XUID_Low: " << xuidLow << std::endl;
-                 }
-                 
-                 // Attributes logic
-                 bool gameReverted = (currentDef != skinManager->Gloves.defIndex);
-                 
-                 if (userChangedSettings || ForceUpdate || gameReverted) 
-                 {
-                     // Disable Initialization during write
-                     mem.Write<bool>(econGloves + Offsets::m_bInitialized, false);
+                 if (firstRun || skinManager->Gloves.defIndex != lastTargetDef || skinManager->Gloves.Paint != lastTargetPaint || ForceUpdate) {
+                     std::cout << "[GloveUpdate] TargetDef: " << skinManager->Gloves.defIndex << " | TargetPaint: " << skinManager->Gloves.Paint << std::endl;
                      
                      mem.Write<uint16_t>(econGloves + Offsets::m_iItemDefinitionIndex, skinManager->Gloves.defIndex);
-                     
-                     // Set ItemID to -1 (both Low and High)
-                     mem.Write<int>(econGloves + Offsets::m_iItemIDHigh, -1);
-                     mem.Write<int>(econGloves + Offsets::m_iItemIDHigh + 4, -1);
-                     
+                     mem.Write<uint32_t>(econGloves + Offsets::m_iItemIDHigh, 0xFFFFFFFF);
+                     mem.Write<uint32_t>(econGloves + Offsets::m_iAccountID, 0);
+                     mem.Write<bool>(econGloves + Offsets::m_bInitialized, true);
                      mem.Write<int>(econGloves + Offsets::m_iEntityQuality, 3);
-                     
-                     // Apply XUID if found
-                     if (xuidLow != -1) {
-                         mem.Write<int>(econGloves + Offsets::m_OriginalOwnerXuidLow, xuidLow);
-                         mem.Write<int>(econGloves + Offsets::m_OriginalOwnerXuidLow + 4, xuidHigh);
-                         mem.Write<int>(econGloves + Offsets::m_iAccountID, xuidLow); 
-                     } else {
-                         mem.Write<int>(econGloves + Offsets::m_iAccountID, 12345);
-                     }
 
-                     // Create Attribute List
                      SkinInfo_t gloveSkin;
                      gloveSkin.Paint = skinManager->Gloves.Paint;
-                     gloveSkin.weaponType = WeaponsEnum::none; 
+                     gloveSkin.defIndex = skinManager->Gloves.defIndex;
+                     gloveSkin.weaponType = WeaponsEnum::none;
                      econItemAttributeManager.Create(econGloves, gloveSkin);
-
-
-                     mem.Write<bool>(econGloves + Offsets::m_bInitialized, true);
-                     
                      mem.Write<bool>(localPlayerPawn + Offsets::m_bNeedToReApplyGloves, true);
-                     
-                     lastGloveDef = skinManager->Gloves.defIndex;
-                     lastGlovePaint = skinManager->Gloves.Paint;
+
+                     lastTargetDef = skinManager->Gloves.defIndex;
+                     lastTargetPaint = skinManager->Gloves.Paint;
+                     firstRun = false;
                  }
              }
         }

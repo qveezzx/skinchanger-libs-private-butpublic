@@ -103,10 +103,8 @@ void RenderWeaponTab(float x, float y, float w, float h)
         bool selected = (selectedSkinIndex == idx);
         
         if (SC_GUI::SkinCard("wskin_" + availableSkins[idx].name, availableSkins[idx].name, availableSkins[idx].image_url, availableSkins[idx].rarity, cX, cY, itemW, itemH, selected, configManager->diskCacheEnabled)) {
-            if (idx != 0) skinManager->AddSkin(availableSkins[idx]);
-            else {
-                skinManager->AddSkin(availableSkins[idx]); 
-            }
+            skinManager->AddSkin(availableSkins[idx]); 
+            ForceUpdate = true;
         }
         displayIdx++;
     }
@@ -235,6 +233,7 @@ void RenderKnifeTab(float x, float y, float w, float h)
                  s.weaponType = WeaponsEnum::CtKnife; skinManager->AddSkin(s);
                  s.weaponType = WeaponsEnum::Tknife; skinManager->AddSkin(s);
              }
+             ForceUpdate = true;
          }
          displayIdx++;
     }
