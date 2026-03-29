@@ -1,0 +1,35 @@
+name: Build CS2 Skin Changer
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.2.0
+
+    - name: Restore NuGet Packages
+      run: nuget restore ext-cs2-skin-changer.sln
+
+    - name: Build Solution
+      run: msbuild ext-cs2-skin-changer.sln /p:Configuration=Release /p:Platform=x64
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ext-cs2-skin-changer-x64-release
+        path: |
+          x64/Release/*.exe
+          x64/Release/*.dll
+
