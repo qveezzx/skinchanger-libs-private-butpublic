@@ -63,6 +63,6 @@ namespace Offsets
     inline std::ptrdiff_t m_szCustomNameOverride = cs2_dumper::schemas::client_dll::C_EconItemView::m_szCustomNameOverride; // char[161]
     inline std::ptrdiff_t m_iItemIDHigh = cs2_dumper::schemas::client_dll::C_EconItemView::m_iItemIDHigh; // uint32
 
-    inline std::ptrdiff_t m_pDirtyModelData = 0xD8;
-    inline std::ptrdiff_t m_DrityMeshGroupMask = 0x10;
+    inline std::ptrdiff_t m_pDirtyModelData = 0x3B8; // C_BaseModelEntity::m_pDirtyModelData
+    inline std::ptrdiff_t m_DrityMeshGroupMask = 0x10; // C_DirtyModelData::m_DrityMeshGroupMask
 }
