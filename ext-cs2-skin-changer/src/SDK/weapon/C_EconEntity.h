@@ -105,9 +105,13 @@ void SetMeshMask(const uintptr_t ent, const uint64_t mask)
 {
     const auto& node = mem.Read<uintptr_t>(ent + Offsets::m_pGameSceneNode);
     const auto model = node + Offsets::m_modelState;
-    const auto dirtyAttributes = mem.Read<uintptr_t>(model + Offsets::m_pDirtyModelData);
-
-    mem.Write<uint64_t>(dirtyAttributes + Offsets::m_DrityMeshGroupMask, mask);
+    
+    // CS2 uses m_pDirtyModelData + m_DrityMeshGroupMask to signal a mesh update
+    // Setting mask to 2 usually forces the game to refresh the model and materials
+    const auto dirtyAttributes = mem.Read<uintptr_t>(ent + Offsets::m_pDirtyModelData);
+    if (dirtyAttributes) {
+        mem.Write<uint32_t>(dirtyAttributes + Offsets::m_DrityMeshGroupMask, 1);
+    }
 
     bool updated = false;
 

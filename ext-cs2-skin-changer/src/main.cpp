@@ -9,26 +9,6 @@
 #include "SDK/CEconItemAttributeManager.h"
 #include "update_offsets.h"
 
-void UpdateActiveMenuDef(const uintptr_t localPlayer)
-{
-    // Implementation for HUD update signal
-}
-
-void SetMeshMask(uintptr_t entity, uint64_t mask) {
-    if (!entity) return;
-    uintptr_t gameSceneNode = mem.Read<uintptr_t>(entity + Offsets::m_pGameSceneNode);
-    if (!gameSceneNode) return;
-
-    // CS2 uses m_pDirtyModelData + m_DrityMeshGroupMask to signal a mesh update
-    // Setting mask to 2 usually forces the game to refresh the model and materials
-    mem.Write<uint64_t>(gameSceneNode + Offsets::m_modelState + Offsets::m_MeshGroupMask, mask);
-    
-    uintptr_t pDirtyModelData = mem.Read<uintptr_t>(entity + Offsets::m_pDirtyModelData);
-    if (pDirtyModelData) {
-        mem.Write<uint32_t>(pDirtyModelData + Offsets::m_DrityMeshGroupMask, 1);
-    }
-}
-
 void Radar()
 {
     for (uint8_t i = 1; i < 64; i++)
@@ -149,6 +129,8 @@ int main()
                     mem.Write<uint16_t>(item + Offsets::m_iItemDefinitionIndex, skinManager->Knife.defIndex);
                     // Set quality to 3 (Star)
                     mem.Write<int>(item + Offsets::m_iEntityQuality, 3);
+                    // Set ID High to -1 to allow SOC
+                    mem.Write<uint32_t>(item + Offsets::m_iItemIDHigh, -1);
                 }
             }
 
@@ -185,9 +167,11 @@ int main()
                              if (skinManager->Knife.defIndex != 0) {
                                  mem.Write<uint16_t>(viewModel + Offsets::m_iItemDefinitionIndex, skinManager->Knife.defIndex);
                                  mem.Write<int>(viewModel + Offsets::m_iEntityQuality, 3);
+                                 mem.Write<uint32_t>(viewModel + Offsets::m_iItemIDHigh, -1);
                                  
                                  SkinInfo_t knifeSkin = skinManager->GetKnife();
                                  econItemAttributeManager.Create(viewModel, knifeSkin);
+                                 SetMeshMask(viewModel, 2);
                              }
                          }
                      }
