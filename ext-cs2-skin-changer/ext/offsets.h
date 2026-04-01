@@ -6,12 +6,8 @@
 namespace Offsets
 {
     inline std::ptrdiff_t dwEntityList = cs2_dumper::offsets::client_dll::dwEntityList;
-    inline std::ptrdiff_t dwGameEntitySystem = cs2_dumper::offsets::client_dll::dwEntityList;
-    inline std::ptrdiff_t dwGameEntitySystem_highestEntityIndex = cs2_dumper::offsets::client_dll::dwGameEntitySystem_highestEntityIndex;
     inline std::ptrdiff_t dwLocalPlayerController = cs2_dumper::offsets::client_dll::dwLocalPlayerController;
     inline std::ptrdiff_t dwLocalPlayerPawn = cs2_dumper::offsets::client_dll::dwLocalPlayerPawn;
-
-    ///////////////////////////////////////////////////////////
 
     inline std::ptrdiff_t m_pInventoryServices = cs2_dumper::schemas::client_dll::CCSPlayerController::m_pInventoryServices; // CCSPlayerController_InventoryServices*
     inline std::ptrdiff_t m_unMusicID = cs2_dumper::schemas::client_dll::CCSPlayerController_InventoryServices::m_unMusicID; // uint16
@@ -21,7 +17,6 @@ namespace Offsets
     inline std::ptrdiff_t m_pViewModelServices = cs2_dumper::schemas::client_dll::C_CSPlayerPawnBase::m_pViewModelServices; // CPlayer_ViewModelServices*
     inline std::ptrdiff_t m_hViewModel = 0x40; // CHandle<C_BaseViewModel>[3]
     inline std::ptrdiff_t m_hWeaponViewModel = 0x1940; // C_CSWeaponBase::m_hWeaponViewModel
-    inline std::ptrdiff_t m_hHudModelArms = 0x0; // Removed in current schema, setting to 0 to avoid error
     inline std::ptrdiff_t m_hOwnerEntity = cs2_dumper::schemas::client_dll::C_BaseEntity::m_hOwnerEntity; // CHandle<C_BaseEntity>
     inline std::ptrdiff_t m_pEntity = cs2_dumper::schemas::client_dll::CEntityInstance::m_pEntity; // CEntityIdentity*
     inline std::ptrdiff_t m_flags = cs2_dumper::schemas::client_dll::CEntityIdentity::m_flags; // uint32

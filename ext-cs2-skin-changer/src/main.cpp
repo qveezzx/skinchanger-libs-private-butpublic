@@ -110,17 +110,17 @@ int main()
         {
             const uintptr_t item = weapon + Offsets::m_AttributeManager + Offsets::m_Item;
             
-            if(ForceUpdate)
-                mem.Write<uint32_t>(item + Offsets::m_iItemIDHigh, NULL);
+            if (ForceUpdate)
+                mem.Write<uint32_t>(item + Offsets::m_iItemIDHigh, 0);
+
+            SkinInfo_t skin = GetSkin(item);
+            if (!skin.Paint && skin.weaponType != WeaponsEnum::CtKnife && skin.weaponType != WeaponsEnum::Tknife) 
+                continue;
 
             if (mem.Read<uint32_t>(item + Offsets::m_iItemIDHigh) == -1)
                 continue;
 
             mem.Write<uint32_t>(item + Offsets::m_iItemIDHigh, -1);
-
-            SkinInfo_t skin = GetSkin(item);
-            if (!skin.Paint && skin.weaponType != WeaponsEnum::CtKnife && skin.weaponType != WeaponsEnum::Tknife) 
-                continue;
 
             // --- Knife Changer Support ---
             if (skin.weaponType == WeaponsEnum::CtKnife || skin.weaponType == WeaponsEnum::Tknife) {
