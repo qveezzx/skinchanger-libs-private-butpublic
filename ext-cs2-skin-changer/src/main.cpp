@@ -150,31 +150,39 @@ int main()
         }
 
         // --- Knife & Viewmodel Update ---
-        uintptr_t pViewModelServices = mem.Read<uintptr_t>(localPlayer + Offsets::m_pViewModelServices);
-        if (pViewModelServices) {
-            uint32_t hViewModel = mem.Read<uint32_t>(pViewModelServices + Offsets::m_hViewModel);
-            if (hViewModel != 0xFFFFFFFF) {
-                uintptr_t viewModel = GetEntityByHandle(hViewModel & 0x7FFF);
-                if (viewModel) {
-                     uint32_t activeWeaponHandle = mem.Read<uint32_t>(pWeaponServices + Offsets::m_hActiveWeapon);
-                     uintptr_t activeWeapon = GetEntityByHandle(activeWeaponHandle & 0x7FFF);
-                     if (activeWeapon) {
-                         uintptr_t item = activeWeapon + Offsets::m_AttributeManager + Offsets::m_Item;
-                         uint16_t activeDef = mem.Read<uint16_t>(item + Offsets::m_iItemDefinitionIndex);
-                         
-                         // CT: 42, T: 59, or custom knives
-                         if (activeDef == 42 || activeDef == 59 || (activeDef >= 500 && activeDef <= 526)) {
-                             if (skinManager->Knife.defIndex != 0) {
-                                 mem.Write<uint16_t>(viewModel + Offsets::m_iItemDefinitionIndex, skinManager->Knife.defIndex);
-                                 mem.Write<int>(viewModel + Offsets::m_iEntityQuality, 3);
-                                 mem.Write<uint32_t>(viewModel + Offsets::m_iItemIDHigh, -1);
-                                 
-                                 SkinInfo_t knifeSkin = skinManager->GetKnife();
-                                 econItemAttributeManager.Create(viewModel, knifeSkin);
-                                 SetMeshMask(viewModel, 2);
-                             }
-                         }
-                     }
+        uintptr_t activeWeaponHandle = mem.Read<uint32_t>(pWeaponServices + Offsets::m_hActiveWeapon);
+        uintptr_t activeWeapon = GetEntityByHandle(activeWeaponHandle & 0x7FFF);
+        
+        if (activeWeapon) {
+            uintptr_t item = activeWeapon + Offsets::m_AttributeManager + Offsets::m_Item;
+            uint16_t activeDef = mem.Read<uint16_t>(item + Offsets::m_iItemDefinitionIndex);
+
+            // CT: 42, T: 59, or custom knives (500-526)
+            if (activeDef == 42 || activeDef == 59 || (activeDef >= 500 && activeDef <= 526)) {
+                if (skinManager->Knife.defIndex != 0) {
+                    // Method 1: Get viewmodel from weapon (0x1940)
+                    uint32_t hWeaponViewModel = mem.Read<uint32_t>(activeWeapon + Offsets::m_hWeaponViewModel);
+                    uintptr_t viewModel = GetEntityByHandle(hWeaponViewModel & 0x7FFF);
+
+                    // Method 2 fallback: Get from player pawn services
+                    if (!viewModel) {
+                        uintptr_t pViewModelServices = mem.Read<uintptr_t>(localPlayer + Offsets::m_pViewModelServices);
+                        if (pViewModelServices) {
+                            uint32_t hViewModel = mem.Read<uint32_t>(pViewModelServices + Offsets::m_hViewModel);
+                            viewModel = GetEntityByHandle(hViewModel & 0x7FFF);
+                        }
+                    }
+
+                    if (viewModel) {
+                        // Apply changes to the viewmodel entity
+                        mem.Write<uint16_t>(viewModel + Offsets::m_iItemDefinitionIndex, skinManager->Knife.defIndex);
+                        mem.Write<int>(viewModel + Offsets::m_iEntityQuality, 3);
+                        mem.Write<uint32_t>(viewModel + Offsets::m_iItemIDHigh, -1);
+
+                        SkinInfo_t knifeSkin = skinManager->GetKnife();
+                        econItemAttributeManager.Create(viewModel, knifeSkin);
+                        SetMeshMask(viewModel, 2);
+                    }
                 }
             }
         }
